@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Bintz-API Docs">
     <meta name="theme-color" content="#0a0f1c">
-    <title>Bintz-API | ELECTRONIC</title>
+    <title>Bintz-API</title>
     <link rel="icon" href="/assets/icon.png" type="image/jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -425,6 +425,18 @@
             color: #ff00ff;
             transform: translateY(-50%) scale(1.1);
         }
+
+        /* Dynamic URL */
+        .dynamic-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #00ffff;
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body class="bg-[#050a14] text-cyan-300 font-mono antialiased min-h-screen relative overflow-x-hidden">
@@ -533,17 +545,10 @@
             <div class="flex justify-between items-center text-xs text-cyan-700">
                 <div class="flex items-center gap-2">
                     <span class="led w-1.5 h-1.5"></span>
-                    <span>© 2025 BINTZOFFC</span>
+                    <span>© 2026 BINTZOFFC</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span>DESIGN_INSPIRED_BY</span>
-                    <a href="https://api.nekolabs.my.id/" target="_blank" class="text-cyan-500 hover:text-pink-500 transition-colors underline decoration-cyan-500/30">
-                        NEKOLABS
-                    </a>
-                </div>
-            </div>
-        </footer>
-    </main>
+                    <span>REST API 🔥</span>
 
     <!-- Floating Donation Menu -->
     <div class="donation-menu">
@@ -605,11 +610,29 @@
     // Function to copy text to clipboard
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-            // Optional: Show notification
             alert('URL copied to clipboard!');
         }).catch(err => {
             console.error('Failed to copy: ', err);
         });
+    }
+
+    // Function to update dynamic URL based on input values
+    function updateDynamicUrl(catIndex, endpointIndex) {
+        const form = document.getElementById(`form-${catIndex}-${endpointIndex}`);
+        const urlDisplay = document.getElementById(`dynamic-url-${catIndex}-${endpointIndex}`);
+        const basePath = urlDisplay.getAttribute('data-base-path');
+        
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        
+        for (const [key, value] of formData.entries()) {
+            if (value && value.trim() !== '') {
+                params.append(key, value);
+            }
+        }
+        
+        const fullUrl = `${BASE_URL}${basePath}${params.toString() ? '?' + params.toString() : ''}`;
+        urlDisplay.textContent = fullUrl;
     }
 
     // Modal functions
@@ -798,8 +821,8 @@
                     const path = pathParts[0];
                     const queryParams = new URLSearchParams(pathParts[1] || '');
                     
-                    // Build full URL for display
-                    const fullUrl = `${BASE_URL}${item.path}`;
+                    // Build base URL without params for dynamic updates
+                    const basePath = item.path;
 
                     const statusClasses = {
                         'ready': 'bg-green-500/10 text-green-400 border border-green-500/30',
@@ -838,16 +861,16 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- URL Display Section -->
+                                        <!-- URL Display Section with Dynamic Updates -->
                                         <div class="url-display mb-4">
                                             <div class="flex items-center justify-between">
                                                 <span class="url-label">ENDPOINT URL:</span>
-                                                <button class="copy-btn" onclick="copyToClipboard('${fullUrl}')">
+                                                <button class="copy-btn" onclick="copyToClipboard(document.getElementById('dynamic-url-${catIndex}-${endpointIndex}').textContent)">
                                                     <i class="fas fa-copy mr-1"></i>COPY
                                                 </button>
                                             </div>
-                                            <div class="mt-2 text-xs text-cyan-300 break-all font-mono">
-                                                ${fullUrl}
+                                            <div class="dynamic-url" id="dynamic-url-${catIndex}-${endpointIndex}" data-base-path="${basePath}">
+                                                ${BASE_URL}${basePath}
                                             </div>
                                         </div>
                                         `;
@@ -859,7 +882,7 @@
                                                     EXECUTE_COMMAND
                                                 </div>
                                                 <div>
-                                                    <form id="form-${catIndex}-${endpointIndex}" onsubmit="executeRequest(event, ${catIndex}, ${endpointIndex}, '${method}', '${item.path}', 'application/json')">
+                                                    <form id="form-${catIndex}-${endpointIndex}" onsubmit="executeRequest(event, ${catIndex}, ${endpointIndex}, '${method}', '${item.path}', 'application/json')" oninput="updateDynamicUrl(${catIndex}, ${endpointIndex})">
                                                         <div class="mb-4 space-y-3">`;
                         if (item.params) {
                             Object.keys(item.params).forEach(paramName => {
@@ -870,7 +893,7 @@
                                                 ${paramName}
                                                 ${isRequired ? '<span class="text-pink-500 ml-2 text-[10px]">[REQUIRED]</span>' : ''}
                                             </label>
-                                            <input type="text" name="${paramName}" class="cyber-input w-full px-4 py-2.5 text-sm rounded-lg" placeholder="${item.params[paramName]}" ${isRequired ? 'required' : ''}>
+                                            <input type="text" name="${paramName}" class="cyber-input w-full px-4 py-2.5 text-sm rounded-lg" placeholder="${item.params[paramName]}" ${isRequired ? 'required' : ''} onkeyup="updateDynamicUrl(${catIndex}, ${endpointIndex})" onchange="updateDynamicUrl(${catIndex}, ${endpointIndex})">
                                           </div>`;
                             });
                         }
