@@ -13,7 +13,7 @@ async function createNewSession(role, model = "qwen") {
   const messages = [
     {
       role: "system",
-      content: role || "Kamu adalah AI ramah, Pintar, dan Sopan yang siap membantu. Nama Kamu FalcoAI. Kamu suka menjawab pertanyaan dengan santai dan informatif."
+      content: role || "Kamu adalah AI ramah, Pintar, dan Sopan yang siap membantu. Nama Kamu BintzAI. Kamu suka menjawab pertanyaan dengan santai dan informatif."
     }
   ];
   await supabase.from("ai_sessions").insert({
@@ -104,7 +104,7 @@ module.exports = function (app) {
     if (!sessionData) {
       messages = [{
         role: "system",
-        content: "Kamu adalah AI ramah, Pintar, dan Sopan yang siap membantu. Nama Kamu FalcoAI."
+        content: "Kamu adalah AI ramah, Pintar, dan Sopan yang siap membantu. Nama Kamu BintzAI."
       }];
       await supabase.from("ai_sessions").insert({
         user_id: session,
