@@ -6,7 +6,7 @@
     <meta name="description" content="Bintz-API Documentation - Modern Electronic Interface">
     <meta name="theme-color" content="#0a0f1c">
     <title>Bintz-API | ELECTRONIC</title>
-    <link rel="icon" href="/assets/icon.png" type="image/jpeg">
+    <link rel="icon" href="/assets/default.png" type="image/jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -377,6 +377,30 @@
             opacity: 1;
             right: 80px;
         }
+
+        /* Clear search button */
+        .clear-search {
+            position: absolute;
+            right: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00ffff;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .clear-search.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .clear-search:hover {
+            color: #ff00ff;
+            transform: translateY(-50%) scale(1.1);
+        }
     </style>
 </head>
 <body class="bg-[#050a14] text-cyan-300 font-mono antialiased min-h-screen relative overflow-x-hidden">
@@ -389,7 +413,7 @@
         <div class="mb-8 relative group">
             <div class="flex items-center gap-4 mb-4">
                 <div class="relative">
-                    <img src="/assets/icon.png" class="w-12 md:w-9 rounded-lg border-2 border-cyan-500/50 neon-border">
+                    <img src="/assets/default.png" class="w-12 md:w-9 rounded-lg border-2 border-cyan-500/50 neon-border">
                     <div class="absolute -inset-1 bg-cyan-500/20 blur-lg rounded-lg group-hover:bg-cyan-500/30 transition-all duration-500"></div>
                 </div>
                 <div>
@@ -454,8 +478,11 @@
                     type="text" 
                     id="searchInput" 
                     placeholder=">_ SEARCH_ENDPOINTS..." 
-                    class="cyber-input w-full pl-12 pr-5 py-4 text-sm rounded-lg transition-all duration-300"
+                    class="cyber-input w-full pl-12 pr-24 py-4 text-sm rounded-lg transition-all duration-300"
+                    autocomplete="off"
                 >
+                <!-- Clear button (X) -->
+                <span id="clearSearch" class="clear-search material-icons" onclick="clearSearchInput()">close</span>
                 <div class="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
                     <span class="led w-1.5 h-1.5"></span>
                     <span class="led w-1.5 h-1.5 red"></span>
@@ -482,10 +509,17 @@
             <div class="flex justify-between items-center text-xs text-cyan-700">
                 <div class="flex items-center gap-2">
                     <span class="led w-1.5 h-1.5"></span>
-                    <span>© 2026 BINTZOFFC</span>
+                    <span>© 2025 BINTZOFFC</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span>REST API 🔥</span>
+                    <span>DESIGN_INSPIRED_BY</span>
+                    <a href="https://api.nekolabs.my.id/" target="_blank" class="text-cyan-500 hover:text-pink-500 transition-colors underline decoration-cyan-500/30">
+                        NEKOLABS
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </main>
 
     <!-- Floating Donation Menu -->
     <div class="donation-menu">
@@ -537,6 +571,10 @@
     </div>
 
     <script>
+    // Store all API items for search
+    let allApiItems = [];
+    let allCategories = [];
+
     // Modal functions
     function openDonationModal() {
         document.getElementById('donationModal').style.display = 'flex';
@@ -623,6 +661,74 @@
         responseContent.innerHTML = '';
         responseDiv.classList.add('hidden');
         clearButton.classList.add('hidden');
+    }
+
+    // Function to clear search input
+    function clearSearchInput() {
+        const searchInput = document.getElementById('searchInput');
+        searchInput.value = '';
+        searchInput.focus();
+        performSearch('');
+        updateClearButton('');
+    }
+
+    // Function to update clear button visibility
+    function updateClearButton(searchTerm) {
+        const clearButton = document.getElementById('clearSearch');
+        if (searchTerm.length > 0) {
+            clearButton.classList.add('visible');
+        } else {
+            clearButton.classList.remove('visible');
+        }
+    }
+
+    // Function to perform search
+    function performSearch(searchTerm) {
+        const apiItems = document.querySelectorAll('.api-item');
+        const categories = document.querySelectorAll('.category-group');
+        const noResults = document.getElementById('noResults');
+        let visibleCount = 0;
+
+        if (searchTerm === '') {
+            // If search is empty, show all items
+            apiItems.forEach(item => {
+                item.style.display = '';
+            });
+            categories.forEach(category => {
+                category.style.display = '';
+            });
+            noResults.style.display = 'none';
+            return;
+        }
+
+        searchTerm = searchTerm.toLowerCase();
+        apiItems.forEach(item => {
+            const path = item.dataset.path.toLowerCase();
+            const alias = item.dataset.alias.toLowerCase();
+            const description = item.dataset.description.toLowerCase();
+            
+            if (path.includes(searchTerm) || alias.includes(searchTerm) || description.includes(searchTerm)) {
+                item.style.display = '';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        categories.forEach(category => {
+            const visibleItems = category.querySelectorAll('.api-item[style=""]');
+            if (visibleItems.length > 0) {
+                category.style.display = '';
+            } else {
+                category.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
     }
 
     // Function to load and render APIs
@@ -753,6 +859,11 @@
                 html += `</div></div></div>`;
             });
             apiList.innerHTML = html;
+            
+            // Store references after loading
+            allApiItems = document.querySelectorAll('.api-item');
+            allCategories = document.querySelectorAll('.category-group');
+            
         } catch (error) {
             apiList.innerHTML = '<p class="text-pink-500 bg-pink-500/10 p-4 rounded-lg border border-pink-500/30">[ERROR] Failed to load API data.</p>';
             console.error('Error loading API data:', error);
@@ -806,40 +917,18 @@
         }
     }
 
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const apiItems = document.querySelectorAll('.api-item');
-        const categories = document.querySelectorAll('.category-group');
-        const noResults = document.getElementById('noResults');
-        let visibleCount = 0;
+    // Search functionality with improved handling
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value;
+        performSearch(searchTerm);
+        updateClearButton(searchTerm);
+    });
 
-        apiItems.forEach(item => {
-            const path = item.dataset.path.toLowerCase();
-            const alias = item.dataset.alias.toLowerCase();
-            const description = item.dataset.description.toLowerCase();
-            
-            if (path.includes(searchTerm) || alias.includes(searchTerm) || description.includes(searchTerm)) {
-                item.style.display = '';
-                visibleCount++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-
-        categories.forEach(category => {
-            const visibleItems = category.querySelectorAll('.api-item[style=""]');
-            if (visibleItems.length > 0) {
-                category.style.display = '';
-            } else {
-                category.style.display = 'none';
-            }
-        });
-
-        if (visibleCount === 0) {
-            noResults.style.display = 'block';
-        } else {
-            noResults.style.display = 'none';
+    // Handle backspace/delete key to show all when empty
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (this.value === '') {
+            performSearch('');
+            updateClearButton('');
         }
     });
 
@@ -854,6 +943,9 @@
                 closeDonationModal();
             }
         });
+        
+        // Initial clear button state
+        updateClearButton('');
     });
     </script>
 </body>
