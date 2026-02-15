@@ -39,7 +39,7 @@ module.exports = function(app) {
 
       res.json({
         status: true,
-        creator: 'FlowFalcon',
+        creator: 'Bintz',
         page: parseInt(page),
         result: mangaList
       });
@@ -47,7 +47,7 @@ module.exports = function(app) {
     } catch (err) {
       res.status(500).json({
         status: false,
-        creator: 'FlowFalcon',
+        creator: 'Bintz',
         message: 'Gagal scrape data',
         error: err.message
       });
