@@ -772,7 +772,7 @@
     async function loadApis() {
         const apiList = document.getElementById('apiList');
         try {
-            const response = await fetch('/settings.json');
+            const response = await fetch('/assets/settings.json');
             const data = await response.json();
             
             let html = '';
